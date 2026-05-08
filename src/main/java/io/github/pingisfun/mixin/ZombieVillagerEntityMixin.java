@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ZombieVillager.class)
 public abstract class ZombieVillagerEntityMixin {
     @Inject(method = "lambda$finishConversion$0", at = @At("TAIL"))
-    private void villager_overhaul$afterCureConversion(ServerLevel world, Villager villager, CallbackInfo ci) {
+    private void villager_rebalance$afterCureConversion(ServerLevel world, Villager villager, CallbackInfo ci) {
         CureTradePenaltyService.onCured(world, villager);
     }
 }

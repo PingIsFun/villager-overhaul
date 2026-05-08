@@ -23,8 +23,8 @@ public final class CureTradePenaltyService {
         VillagerOverhaulConfig config = VillagerOverhaul.config();
         CureDataHolder data = (CureDataHolder) villager;
 
-        int cureCount = data.villager_overhaul$getCureCount() + 1;
-        data.villager_overhaul$setCureCount(cureCount);
+        int cureCount = data.villager_rebalance$getCureCount() + 1;
+        data.villager_rebalance$setCureCount(cureCount);
 
         if (!config.curing.enabled || cureCount <= config.curing.maxSafeCures) {
             return;

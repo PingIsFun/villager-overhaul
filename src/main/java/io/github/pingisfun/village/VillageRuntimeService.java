@@ -121,7 +121,7 @@ public final class VillageRuntimeService {
     private static void rewardWelfare(ServerLevel level, ServerPlayer player, VillagerOverhaulConfig.Welfare config) {
         AABB bounds = around(player.blockPosition(), config.scanRadius);
         for (Villager villager : level.getEntities(EntityType.VILLAGER, bounds, Villager::isAlive)) {
-            ((VillagerGossipAccess) villager).villager_overhaul$getGossips().add(player.getUUID(), GossipType.MINOR_POSITIVE, config.rewardReputation);
+            ((VillagerGossipAccess) villager).villager_rebalance$getGossips().add(player.getUUID(), GossipType.MINOR_POSITIVE, config.rewardReputation);
         }
         player.sendSystemMessage(Component.literal("Village welfare improved nearby trades.")
                 .withStyle(ChatFormatting.GREEN)
@@ -133,7 +133,7 @@ public final class VillageRuntimeService {
     private static void penalizeWelfare(ServerLevel level, ServerPlayer player, VillagerOverhaulConfig.Welfare config) {
         AABB bounds = around(player.blockPosition(), config.scanRadius);
         for (Villager villager : level.getEntities(EntityType.VILLAGER, bounds, Villager::isAlive)) {
-            ((VillagerGossipAccess) villager).villager_overhaul$getGossips().add(player.getUUID(), GossipType.MINOR_NEGATIVE, config.penaltyReputation);
+            ((VillagerGossipAccess) villager).villager_rebalance$getGossips().add(player.getUUID(), GossipType.MINOR_NEGATIVE, config.penaltyReputation);
         }
         player.sendSystemMessage(Component.literal("Village welfare declined nearby trades.")
                 .withStyle(ChatFormatting.RED)

@@ -16,6 +16,7 @@
     "sources": "https://github.com/PingIsFun/villager-rebalance",
     "issues": "https://github.com/PingIsFun/villager-rebalance/issues"
   },
+  "icon": "assets/icon.png",
   "license": "MIT",
   "environment": "server",
   "entrypoints": {
@@ -24,7 +25,7 @@
     ]
   },
   "mixins": [
-    "villager_overhaul.mixins.json"
+    "villager_rebalance.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.19.2",

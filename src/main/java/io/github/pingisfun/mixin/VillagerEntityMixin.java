@@ -36,7 +36,7 @@ import java.util.Map;
 @Mixin(Villager.class)
 public abstract class VillagerEntityMixin extends AbstractVillager implements CureDataHolder, VillagerGossipAccess {
     @Unique
-    private static final String VILLAGER_OVERHAUL_KEY = "villager_overhaul";
+    private static final String VILLAGER_REBALANCE_KEY = "villager_rebalance";
     @Unique
     private static final String CURE_COUNT_KEY = "cure_count";
     @Unique
@@ -48,11 +48,11 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
     @Unique
     private static final String OFFER_SOURCE_KEY = "source";
     @Unique
-    private final Map<String, RerollLock> villager_overhaul$rerollLocks = new HashMap<>();
+    private final Map<String, RerollLock> villager_rebalance$rerollLocks = new HashMap<>();
     @Unique
-    private int villager_overhaul$cureCount;
+    private int villager_rebalance$cureCount;
     @Unique
-    private int villager_overhaul$previousOfferCount;
+    private int villager_rebalance$previousOfferCount;
 
     @Shadow
     private int villagerXp;
@@ -72,27 +72,27 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
     public abstract void setOffers(MerchantOffers offers);
 
     @Override
-    public int villager_overhaul$getCureCount() {
-        return villager_overhaul$cureCount;
+    public int villager_rebalance$getCureCount() {
+        return villager_rebalance$cureCount;
     }
 
     @Override
-    public void villager_overhaul$setCureCount(int cureCount) {
-        villager_overhaul$cureCount = Math.max(0, cureCount);
+    public void villager_rebalance$setCureCount(int cureCount) {
+        villager_rebalance$cureCount = Math.max(0, cureCount);
     }
 
     @Override
-    public GossipContainer villager_overhaul$getGossips() {
+    public GossipContainer villager_rebalance$getGossips() {
         return gossips;
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
-    private void villager_overhaul$writeCureData(ValueOutput view, CallbackInfo ci) {
-        ValueOutput data = view.child(VILLAGER_OVERHAUL_KEY);
-        data.putInt(CURE_COUNT_KEY, villager_overhaul$cureCount);
-        if (!villager_overhaul$rerollLocks.isEmpty()) {
+    private void villager_rebalance$writeCureData(ValueOutput view, CallbackInfo ci) {
+        ValueOutput data = view.child(VILLAGER_REBALANCE_KEY);
+        data.putInt(CURE_COUNT_KEY, villager_rebalance$cureCount);
+        if (!villager_rebalance$rerollLocks.isEmpty()) {
             ValueOutput.ValueOutputList locks = data.childrenList(REROLL_LOCKS_KEY);
-            for (Map.Entry<String, RerollLock> entry : villager_overhaul$rerollLocks.entrySet()) {
+            for (Map.Entry<String, RerollLock> entry : villager_rebalance$rerollLocks.entrySet()) {
                 RerollLock lock = entry.getValue();
                 ValueOutput lockOutput = locks.addChild();
                 lockOutput.putString(LOCKED_PROFESSION_KEY, entry.getKey());
@@ -107,23 +107,23 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-    private void villager_overhaul$readCureData(ValueInput view, CallbackInfo ci) {
-        ValueInput data = view.childOrEmpty(VILLAGER_OVERHAUL_KEY);
-        villager_overhaul$cureCount = Math.max(0, data.getIntOr(CURE_COUNT_KEY, 0));
-        villager_overhaul$rerollLocks.clear();
+    private void villager_rebalance$readCureData(ValueInput view, CallbackInfo ci) {
+        ValueInput data = view.childOrEmpty(VILLAGER_REBALANCE_KEY);
+        villager_rebalance$cureCount = Math.max(0, data.getIntOr(CURE_COUNT_KEY, 0));
+        villager_rebalance$rerollLocks.clear();
         for (ValueInput lockInput : data.childrenListOrEmpty(REROLL_LOCKS_KEY)) {
             String profession = lockInput.getString(LOCKED_PROFESSION_KEY).orElse(null);
             MerchantOffers offers = lockInput.read(LOCKED_OFFERS_KEY, MerchantOffers.CODEC).orElse(null);
             int[] source = lockInput.getIntArray(OFFER_SOURCE_KEY).orElse(null);
             if (profession != null && offers != null && source != null && source.length == 3) {
-                villager_overhaul$rerollLocks.put(profession, new RerollLock(offers, new BlockPos(source[0], source[1], source[2])));
+                villager_rebalance$rerollLocks.put(profession, new RerollLock(offers, new BlockPos(source[0], source[1], source[2])));
             }
         }
     }
 
     @Inject(method = "setVillagerData", at = @At("HEAD"))
-    private void villager_overhaul$clearRerollLockWhenProfessionChanges(VillagerData data, CallbackInfo ci) {
-        if (villager_overhaul$rerollLocks.isEmpty()) {
+    private void villager_rebalance$clearRerollLockWhenProfessionChanges(VillagerData data, CallbackInfo ci) {
+        if (villager_rebalance$rerollLocks.isEmpty()) {
             return;
         }
 
@@ -135,23 +135,23 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
 
         int radius = VillagerOverhaul.config().rerollPrevention.memoryRadius;
         double maxDistanceSquared = (double) radius * radius;
-        villager_overhaul$rerollLocks.values().removeIf(lock -> this.blockPosition().distSqr(lock.source()) > maxDistanceSquared);
+        villager_rebalance$rerollLocks.values().removeIf(lock -> this.blockPosition().distSqr(lock.source()) > maxDistanceSquared);
     }
 
     @Inject(method = "rewardTradeXp", at = @At("TAIL"))
-    private void villager_overhaul$clearRerollLockAfterTrade(MerchantOffer offer, CallbackInfo ci) {
-        villager_overhaul$clearOfferLock();
+    private void villager_rebalance$clearRerollLockAfterTrade(MerchantOffer offer, CallbackInfo ci) {
+        villager_rebalance$clearOfferLock();
     }
 
     @Inject(method = "updateTrades", at = @At("HEAD"), cancellable = true)
-    private void villager_overhaul$restoreLockedOffers(ServerLevel level, CallbackInfo ci) {
-        villager_overhaul$previousOfferCount = this.offers == null ? 0 : this.offers.size();
-        if (!villager_overhaul$canUseRerollLock()) {
+    private void villager_rebalance$restoreLockedOffers(ServerLevel level, CallbackInfo ci) {
+        villager_rebalance$previousOfferCount = this.offers == null ? 0 : this.offers.size();
+        if (!villager_rebalance$canUseRerollLock()) {
             return;
         }
 
-        String profession = villager_overhaul$professionId();
-        RerollLock lock = villager_overhaul$rerollLocks.get(profession);
+        String profession = villager_rebalance$professionId();
+        RerollLock lock = villager_rebalance$rerollLocks.get(profession);
         if (lock != null) {
             this.setOffers(lock.offers().copy());
             ci.cancel();
@@ -159,10 +159,10 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
     }
 
     @Inject(method = "updateTrades", at = @At("TAIL"))
-    private void villager_overhaul$storeAndAdjustNewOffers(ServerLevel level, CallbackInfo ci) {
-        LibrarianTradeService.adjustNewOffers(level, (Villager) (Object) this, villager_overhaul$previousOfferCount);
-        String profession = villager_overhaul$professionId();
-        if (!villager_overhaul$canUseRerollLock() || villager_overhaul$rerollLocks.containsKey(profession) || this.offers == null || this.offers.isEmpty()) {
+    private void villager_rebalance$storeAndAdjustNewOffers(ServerLevel level, CallbackInfo ci) {
+        LibrarianTradeService.adjustNewOffers(level, (Villager) (Object) this, villager_rebalance$previousOfferCount);
+        String profession = villager_rebalance$professionId();
+        if (!villager_rebalance$canUseRerollLock() || villager_rebalance$rerollLocks.containsKey(profession) || this.offers == null || this.offers.isEmpty()) {
             return;
         }
 
@@ -170,27 +170,27 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
                 .getMemory(MemoryModuleType.JOB_SITE)
                 .map(GlobalPos::pos)
                 .orElse(this.blockPosition());
-        villager_overhaul$rerollLocks.put(profession, new RerollLock(this.offers.copy(), source));
+        villager_rebalance$rerollLocks.put(profession, new RerollLock(this.offers.copy(), source));
     }
 
     @Unique
-    private boolean villager_overhaul$canUseRerollLock() {
+    private boolean villager_rebalance$canUseRerollLock() {
         VillagerOverhaulConfig config = VillagerOverhaul.config();
         return config.rerollPrevention.enabled
                 && villagerXp <= 0
                 && !this.getVillagerData().profession().is(VillagerProfession.NONE)
-                && config.rerollPrevention.affectedProfessions.contains(villager_overhaul$professionId())
+                && config.rerollPrevention.affectedProfessions.contains(villager_rebalance$professionId())
                 && (this.offers == null || this.offers.stream().noneMatch(offer -> offer.getUses() > 0));
     }
 
     @Unique
-    private String villager_overhaul$professionId() {
+    private String villager_rebalance$professionId() {
         return BuiltInRegistries.VILLAGER_PROFESSION.getKey(this.getVillagerData().profession().value()).toString();
     }
 
     @Unique
-    private void villager_overhaul$clearOfferLock() {
-        villager_overhaul$rerollLocks.clear();
+    private void villager_rebalance$clearOfferLock() {
+        villager_rebalance$rerollLocks.clear();
     }
 
     @Unique

@@ -1,7 +1,7 @@
 package io.github.pingisfun.villager;
 
 public interface CureDataHolder {
-    int villager_overhaul$getCureCount();
+    int villager_rebalance$getCureCount();
 
-    void villager_overhaul$setCureCount(int cureCount);
+    void villager_rebalance$setCureCount(int cureCount);
 }
