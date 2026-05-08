@@ -5,8 +5,17 @@
   "name": "${name}",
   "description": "${description}",
   "authors": [
-    "PingIsFun"
+    {
+      "name": "PingIsFun",
+      "contact": {
+        "email": "pingisfun@gmail.com"
+      }
+    }
   ],
+  "contact": {
+    "sources": "https://github.com/PingIsFun/villager-overhaul",
+    "issues": "https://github.com/PingIsFun/villager-overhaul/issues"
+  },
   "license": "MIT",
   "environment": "server",
   "entrypoints": {
