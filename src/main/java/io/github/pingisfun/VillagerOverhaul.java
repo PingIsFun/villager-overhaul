@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class VillagerOverhaul implements DedicatedServerModInitializer {
-    public static final String MOD_ID = "villager_overhaul";
+    public static final String MOD_ID = "villager-overhaul";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static VillagerOverhaulConfig config;
@@ -18,7 +18,6 @@ public final class VillagerOverhaul implements DedicatedServerModInitializer {
         config = VillagerOverhaulConfig.load();
         VillagerOverhaulCommands.register();
         VillageRuntimeService.register();
-        LOGGER.info("Villager Overhaul loaded with curing module enabled={}", config.curing.enabled);
     }
 
     public static VillagerOverhaulConfig config() {

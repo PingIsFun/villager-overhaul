@@ -38,8 +38,9 @@ public final class VillagerOverhaulConfig {
 
     public static VillagerOverhaulConfig load() {
         VillagerOverhaulConfig config = new VillagerOverhaulConfig();
+        boolean existed = Files.exists(CONFIG_PATH);
 
-        if (Files.exists(CONFIG_PATH)) {
+        if (existed) {
             try (Reader reader = Files.newBufferedReader(CONFIG_PATH)) {
                 VillagerOverhaulConfig loaded = GSON.fromJson(reader, VillagerOverhaulConfig.class);
                 if (loaded != null) {
@@ -52,6 +53,9 @@ public final class VillagerOverhaulConfig {
 
         config.validate();
         config.save();
+        if (!existed && Files.exists(CONFIG_PATH)) {
+            VillagerOverhaul.LOGGER.info("Created default config at {}", CONFIG_PATH);
+        }
         return config;
     }
 
