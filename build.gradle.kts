@@ -77,3 +77,19 @@ tasks {
         dependsOn("build")
     }
 }
+
+publishMods {
+    displayName = "${property("mod.name")} ${project.version}"
+    version = property("mod.version") as String
+    changelog = providers.environmentVariable("CHANGELOG")
+    type = STABLE
+    modLoaders.add("fabric")
+    file.set(tasks.named<Jar>("jar").flatMap { it.archiveFile })
+
+    modrinth {
+        accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
+        projectId.set(property("modrinth.id") as String)
+        minecraftVersions.add(stonecutter.current.version)
+        requires("fabric-api")
+    }
+}
