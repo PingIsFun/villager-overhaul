@@ -1,0 +1,15 @@
+.gradle/
+.fabric/
+build/
+versions/*/build/
+versions/*/.fabric/
+logs/
+versions/*/logs/
+run/
+out/
+
+*.class
+*.log
+*.iml
+
+.idea/

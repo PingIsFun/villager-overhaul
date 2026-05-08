@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "io.github.pingisfun.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "VillagerEntityMixin",
+    "ZombieVillagerEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

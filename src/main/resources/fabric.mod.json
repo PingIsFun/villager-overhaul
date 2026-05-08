@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "${description}",
+  "authors": [
+    "PingIsFun"
+  ],
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "io.github.pingisfun.VillagerOverhaul"
+    ]
+  },
+  "mixins": [
+    "villager_overhaul.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.2",
+    "minecraft": "${minecraft}",
+    "fabric-api": "*",
+    "java": ">=25"
+  }
+}
