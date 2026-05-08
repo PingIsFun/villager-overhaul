@@ -82,7 +82,7 @@ publishMods {
     displayName = "${property("mod.name")} ${project.version}"
     version = property("mod.version") as String
     changelog = providers.environmentVariable("CHANGELOG")
-    type = STABLE
+    type = BETA
     modLoaders.add("fabric")
     file.set(tasks.named<Jar>("jar").flatMap { it.archiveFile })
 
