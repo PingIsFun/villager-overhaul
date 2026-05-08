@@ -9,21 +9,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.gossip.GossipContainer;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerData;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 @Mixin(Villager.class)
@@ -48,11 +47,10 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
     private static final String LOCKED_OFFERS_KEY = "offers";
     @Unique
     private static final String OFFER_SOURCE_KEY = "source";
-
-    @Unique
-    private int villager_overhaul$cureCount;
     @Unique
     private final Map<String, RerollLock> villager_overhaul$rerollLocks = new HashMap<>();
+    @Unique
+    private int villager_overhaul$cureCount;
     @Unique
     private int villager_overhaul$previousOfferCount;
 
@@ -99,10 +97,10 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
                 ValueOutput lockOutput = locks.addChild();
                 lockOutput.putString(LOCKED_PROFESSION_KEY, entry.getKey());
                 lockOutput.store(LOCKED_OFFERS_KEY, MerchantOffers.CODEC, lock.offers());
-                lockOutput.putIntArray(OFFER_SOURCE_KEY, new int[] {
-                    lock.source().getX(),
-                    lock.source().getY(),
-                    lock.source().getZ()
+                lockOutput.putIntArray(OFFER_SOURCE_KEY, new int[]{
+                        lock.source().getX(),
+                        lock.source().getY(),
+                        lock.source().getZ()
                 });
             }
         }
@@ -169,9 +167,9 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
         }
 
         BlockPos source = this.getBrain()
-            .getMemory(MemoryModuleType.JOB_SITE)
-            .map(GlobalPos::pos)
-            .orElse(this.blockPosition());
+                .getMemory(MemoryModuleType.JOB_SITE)
+                .map(GlobalPos::pos)
+                .orElse(this.blockPosition());
         villager_overhaul$rerollLocks.put(profession, new RerollLock(this.offers.copy(), source));
     }
 
@@ -179,10 +177,10 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
     private boolean villager_overhaul$canUseRerollLock() {
         VillagerOverhaulConfig config = VillagerOverhaul.config();
         return config.rerollPrevention.enabled
-            && villagerXp <= 0
-            && !this.getVillagerData().profession().is(VillagerProfession.NONE)
-            && config.rerollPrevention.affectedProfessions.contains(villager_overhaul$professionId())
-            && (this.offers == null || this.offers.stream().noneMatch(offer -> offer.getUses() > 0));
+                && villagerXp <= 0
+                && !this.getVillagerData().profession().is(VillagerProfession.NONE)
+                && config.rerollPrevention.affectedProfessions.contains(villager_overhaul$professionId())
+                && (this.offers == null || this.offers.stream().noneMatch(offer -> offer.getUses() > 0));
     }
 
     @Unique

@@ -13,13 +13,6 @@ public final class VillagerOverhaul implements DedicatedServerModInitializer {
 
     private static VillagerOverhaulConfig config;
 
-    @Override
-    public void onInitializeServer() {
-        config = VillagerOverhaulConfig.load();
-        VillagerOverhaulCommands.register();
-        VillageRuntimeService.register();
-    }
-
     public static VillagerOverhaulConfig config() {
         if (config == null) {
             config = VillagerOverhaulConfig.load();
@@ -30,5 +23,12 @@ public final class VillagerOverhaul implements DedicatedServerModInitializer {
     public static VillagerOverhaulConfig reloadConfig() {
         config = VillagerOverhaulConfig.load();
         return config;
+    }
+
+    @Override
+    public void onInitializeServer() {
+        config = VillagerOverhaulConfig.load();
+        VillagerOverhaulCommands.register();
+        VillageRuntimeService.register();
     }
 }

@@ -18,7 +18,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.phys.AABB;
@@ -69,18 +68,18 @@ public final class LibrarianTradeService {
 
         Registry<Enchantment> registry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         return enchantments.entrySet().stream()
-            .findFirst()
-            .flatMap(entry -> entry.getKey().unwrapKey().map(key -> key.identifier()))
-            .or(() -> enchantments.entrySet().stream().findFirst().map(entry -> registry.getKey(entry.getKey().value())));
+                .findFirst()
+                .flatMap(entry -> entry.getKey().unwrapKey().map(key -> key.identifier()))
+                .or(() -> enchantments.entrySet().stream().findFirst().map(entry -> registry.getKey(entry.getKey().value())));
     }
 
     private static Optional<Holder<Enchantment>> pickEnchantment(
-        ServerLevel level,
-        Villager villager,
-        MerchantOffer offer,
-        VillagerOverhaulConfig config,
-        Set<Identifier> rareIds,
-        List<Holder<Enchantment>> rareEnchantments
+            ServerLevel level,
+            Villager villager,
+            MerchantOffer offer,
+            VillagerOverhaulConfig config,
+            Set<Identifier> rareIds,
+            List<Holder<Enchantment>> rareEnchantments
     ) {
         if (!config.librarians.rareBookBiasEnabled && !config.librarians.rareDuplicatePreventionEnabled) {
             return Optional.empty();
@@ -97,7 +96,7 @@ public final class LibrarianTradeService {
             if (!config.librarians.rareBookBiasEnabled) {
                 List<Holder<Enchantment>> duplicateSafePreferred = preferred;
                 return currentRare.filter(id -> hasNearbyRareDuplicate(level, villager, id, config.librarians.duplicateSearchRadius))
-                    .flatMap(id -> pickReplacement(level, duplicateSafePreferred, id));
+                        .flatMap(id -> pickReplacement(level, duplicateSafePreferred, id));
             }
         }
 
@@ -117,11 +116,11 @@ public final class LibrarianTradeService {
     }
 
     private static List<Holder<Enchantment>> withoutNearbyRareDuplicates(
-        ServerLevel level,
-        Villager villager,
-        List<Holder<Enchantment>> candidates,
-        Set<Identifier> rareIds,
-        int radius
+            ServerLevel level,
+            Villager villager,
+            List<Holder<Enchantment>> candidates,
+            Set<Identifier> rareIds,
+            int radius
     ) {
         Set<Identifier> nearby = new HashSet<>();
         AABB bounds = villager.getBoundingBox().inflate(radius);
@@ -148,7 +147,7 @@ public final class LibrarianTradeService {
         for (Villager other : level.getEntities(EntityType.VILLAGER, bounds, other -> other != villager)) {
             for (MerchantOffer offer : other.getOffers()) {
                 if (offer.getResult().is(Items.ENCHANTED_BOOK)
-                    && bookEnchantmentId(level, offer.getResult()).filter(enchantmentId::equals).isPresent()) {
+                        && bookEnchantmentId(level, offer.getResult()).filter(enchantmentId::equals).isPresent()) {
                     return true;
                 }
             }
@@ -157,9 +156,9 @@ public final class LibrarianTradeService {
     }
 
     private static Optional<Holder<Enchantment>> pickReplacement(
-        ServerLevel level,
-        List<Holder<Enchantment>> candidates,
-        Identifier excluded
+            ServerLevel level,
+            List<Holder<Enchantment>> candidates,
+            Identifier excluded
     ) {
         List<Holder<Enchantment>> filtered = candidates;
         if (excluded != null) {
@@ -182,14 +181,14 @@ public final class LibrarianTradeService {
         ItemStack result = new ItemStack(Items.ENCHANTED_BOOK);
         EnchantmentHelper.updateEnchantments(result, enchantments -> enchantments.set(enchantment, enchantment.value().getMaxLevel()));
         return new MerchantOffer(
-            original.getItemCostA(),
-            original.getItemCostB(),
-            result,
-            original.getUses(),
-            original.getMaxUses(),
-            original.getXp(),
-            original.getPriceMultiplier(),
-            original.getDemand()
+                original.getItemCostA(),
+                original.getItemCostB(),
+                result,
+                original.getUses(),
+                original.getMaxUses(),
+                original.getXp(),
+                original.getPriceMultiplier(),
+                original.getDemand()
         );
     }
 

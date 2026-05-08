@@ -2,11 +2,11 @@ package io.github.pingisfun.villager;
 
 import io.github.pingisfun.VillagerOverhaul;
 import io.github.pingisfun.config.VillagerOverhaulConfig;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 
@@ -60,7 +60,8 @@ public final class CureTradePenaltyService {
         return switch (config.curing.slotSelection) {
             case RANDOM -> Optional.of(eligible.get(random.nextInt(eligible.size())));
             case LAST_SLOT -> eligible.stream().max(Integer::compareTo);
-            case HIGHEST_VALUE -> eligible.stream().max(Comparator.comparingInt(index -> scoreOffer(offers.get(index))));
+            case HIGHEST_VALUE ->
+                    eligible.stream().max(Comparator.comparingInt(index -> scoreOffer(offers.get(index))));
         };
     }
 
@@ -74,10 +75,10 @@ public final class CureTradePenaltyService {
             return 100;
         }
         if (sellItem.is(Items.DIAMOND_CHESTPLATE) || sellItem.is(Items.DIAMOND_LEGGINGS)
-            || sellItem.is(Items.DIAMOND_BOOTS) || sellItem.is(Items.DIAMOND_HELMET)
-            || sellItem.is(Items.DIAMOND_AXE) || sellItem.is(Items.DIAMOND_PICKAXE)
-            || sellItem.is(Items.DIAMOND_SHOVEL) || sellItem.is(Items.DIAMOND_SWORD)
-            || sellItem.is(Items.DIAMOND_HOE)) {
+                || sellItem.is(Items.DIAMOND_BOOTS) || sellItem.is(Items.DIAMOND_HELMET)
+                || sellItem.is(Items.DIAMOND_AXE) || sellItem.is(Items.DIAMOND_PICKAXE)
+                || sellItem.is(Items.DIAMOND_SHOVEL) || sellItem.is(Items.DIAMOND_SWORD)
+                || sellItem.is(Items.DIAMOND_HOE)) {
             return 90;
         }
         if (sellItem.isEnchanted()) {

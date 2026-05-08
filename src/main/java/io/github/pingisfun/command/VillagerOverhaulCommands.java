@@ -36,17 +36,17 @@ public final class VillagerOverhaulCommands {
 
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
-            Commands.literal("villageroverhaul")
-                .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
-                    .executes(context -> help(context.getSource()))
-                    .then(Commands.literal("help")
-                            .executes(context -> help(context.getSource())))
-                .then(Commands.literal("reload")
-                    .executes(context -> reload(context.getSource())))
-                    .then(curingCommands())
-                    .then(rerollCommands())
-                    .then(librarianCommands())
-                    .then(welfareCommands())
+                Commands.literal("villageroverhaul")
+                        .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                        .executes(context -> help(context.getSource()))
+                        .then(Commands.literal("help")
+                                .executes(context -> help(context.getSource())))
+                        .then(Commands.literal("reload")
+                                .executes(context -> reload(context.getSource())))
+                        .then(curingCommands())
+                        .then(rerollCommands())
+                        .then(librarianCommands())
+                        .then(welfareCommands())
         ));
     }
 
@@ -268,9 +268,9 @@ public final class VillagerOverhaulCommands {
         VillagerOverhaulConfig config = VillagerOverhaul.reloadConfig();
         warnInvalidRegistryIds(source, config);
         source.sendSuccess(() -> Component.empty()
-            .append(prefix("Reloaded"))
-            .append(Component.literal(" Config saved and runtime values refreshed.").withStyle(ChatFormatting.GRAY))
-            .withStyle(style -> style.withHoverEvent(hover("Configuration was reloaded from villager-overhaul.json.\nCuring is " + onOff(config.curing.enabled) + "."))), false);
+                .append(prefix("Reloaded"))
+                .append(Component.literal(" Config saved and runtime values refreshed.").withStyle(ChatFormatting.GRAY))
+                .withStyle(style -> style.withHoverEvent(hover("Configuration was reloaded from villager-overhaul.json.\nCuring is " + onOff(config.curing.enabled) + "."))), false);
         return 1;
     }
 
@@ -486,30 +486,30 @@ public final class VillagerOverhaulCommands {
 
     private static MutableComponent prefix(String label) {
         return Component.literal("[Villager Overhaul] ").withStyle(ChatFormatting.GOLD)
-            .append(Component.literal(label).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD));
+                .append(Component.literal(label).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD));
     }
 
     private static MutableComponent helpLine(String command, String tooltip) {
         return Component.literal(" - ").withStyle(ChatFormatting.DARK_GRAY)
                 .append(Component.literal(command).withStyle(ChatFormatting.YELLOW))
-            .withStyle(style -> style
-                    .withHoverEvent(hover(tooltip))
-                    .withClickEvent(new ClickEvent.SuggestCommand(command)));
+                .withStyle(style -> style
+                        .withHoverEvent(hover(tooltip))
+                        .withClickEvent(new ClickEvent.SuggestCommand(command)));
     }
 
     private static MutableComponent groupHeader(String name, boolean enabled, String tooltip) {
         return Component.literal(name).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
-            .append(Component.literal(" ").withStyle(ChatFormatting.GRAY))
-            .append(state(enabled))
-            .withStyle(style -> style.withHoverEvent(hover(tooltip)));
+                .append(Component.literal(" ").withStyle(ChatFormatting.GRAY))
+                .append(state(enabled))
+                .withStyle(style -> style.withHoverEvent(hover(tooltip)));
     }
 
     private static MutableComponent valueLine(String key, Object value, String tooltip) {
         return Component.literal(" - ").withStyle(ChatFormatting.DARK_GRAY)
-            .append(Component.literal(key).withStyle(ChatFormatting.YELLOW))
-            .append(Component.literal(" = ").withStyle(ChatFormatting.GRAY))
-            .append(Component.literal(String.valueOf(value)).withStyle(valueColor(value)))
-            .withStyle(style -> style.withHoverEvent(hover(tooltip)));
+                .append(Component.literal(key).withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal(" = ").withStyle(ChatFormatting.GRAY))
+                .append(Component.literal(String.valueOf(value)).withStyle(valueColor(value)))
+                .withStyle(style -> style.withHoverEvent(hover(tooltip)));
     }
 
     private static MutableComponent listLine(String key, Iterable<?> values, String tooltip) {
@@ -543,7 +543,7 @@ public final class VillagerOverhaulCommands {
 
     private static MutableComponent error(String message, String tooltip) {
         return Component.literal(message).withStyle(ChatFormatting.RED)
-            .withStyle(style -> style.withHoverEvent(hover(tooltip)));
+                .withStyle(style -> style.withHoverEvent(hover(tooltip)));
     }
 
     private static String commandGroupFor(String setting) {

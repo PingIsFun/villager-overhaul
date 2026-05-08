@@ -27,19 +27,19 @@ import java.util.UUID;
 
 public final class VillageRuntimeService {
     private static final Set<Block> JOB_SITE_BLOCKS = Set.of(
-        Blocks.BLAST_FURNACE,
-        Blocks.SMOKER,
-        Blocks.CARTOGRAPHY_TABLE,
-        Blocks.BREWING_STAND,
-        Blocks.COMPOSTER,
-        Blocks.BARREL,
-        Blocks.FLETCHING_TABLE,
-        Blocks.CAULDRON,
-        Blocks.LECTERN,
-        Blocks.STONECUTTER,
-        Blocks.LOOM,
-        Blocks.SMITHING_TABLE,
-        Blocks.GRINDSTONE
+            Blocks.BLAST_FURNACE,
+            Blocks.SMOKER,
+            Blocks.CARTOGRAPHY_TABLE,
+            Blocks.BREWING_STAND,
+            Blocks.COMPOSTER,
+            Blocks.BARREL,
+            Blocks.FLETCHING_TABLE,
+            Blocks.CAULDRON,
+            Blocks.LECTERN,
+            Blocks.STONECUTTER,
+            Blocks.LOOM,
+            Blocks.SMITHING_TABLE,
+            Blocks.GRINDSTONE
     );
 
     private static final Map<UUID, Long> WELFARE_REWARD_COOLDOWNS = new HashMap<>();
@@ -72,15 +72,15 @@ public final class VillageRuntimeService {
         for (ServerPlayer player : level.players()) {
             if (isMaintainedVillage(level, player.blockPosition(), config)) {
                 if (config.rewardEnabled
-                    && config.rewardReputation > 0
-                    && WELFARE_REWARD_COOLDOWNS.getOrDefault(player.getUUID(), 0L) <= level.getGameTime()) {
+                        && config.rewardReputation > 0
+                        && WELFARE_REWARD_COOLDOWNS.getOrDefault(player.getUUID(), 0L) <= level.getGameTime()) {
                     rewardWelfare(level, player, config);
                     WELFARE_REWARD_COOLDOWNS.put(player.getUUID(), level.getGameTime() + config.rewardCooldownTicks);
                 }
             } else if (config.penaltyEnabled
-                && config.penaltyReputation > 0
-                && hasNearbyVillagers(level, player.blockPosition(), config.scanRadius)
-                && WELFARE_PENALTY_COOLDOWNS.getOrDefault(player.getUUID(), 0L) <= level.getGameTime()) {
+                    && config.penaltyReputation > 0
+                    && hasNearbyVillagers(level, player.blockPosition(), config.scanRadius)
+                    && WELFARE_PENALTY_COOLDOWNS.getOrDefault(player.getUUID(), 0L) <= level.getGameTime()) {
                 penalizeWelfare(level, player, config);
                 WELFARE_PENALTY_COOLDOWNS.put(player.getUUID(), level.getGameTime() + config.penaltyCooldownTicks);
             }
@@ -96,8 +96,8 @@ public final class VillageRuntimeService {
         int beds = 0;
         int jobSites = 0;
         for (BlockPos pos : BlockPos.betweenClosed(
-            center.offset(-config.scanRadius, -8, -config.scanRadius),
-            center.offset(config.scanRadius, 8, config.scanRadius)
+                center.offset(-config.scanRadius, -8, -config.scanRadius),
+                center.offset(config.scanRadius, 8, config.scanRadius)
         )) {
             BlockState state = level.getBlockState(pos);
             if (state.is(BlockTags.BEDS) && level.getMaxLocalRawBrightness(pos) >= config.minSafeLight) {
@@ -124,10 +124,10 @@ public final class VillageRuntimeService {
             ((VillagerGossipAccess) villager).villager_overhaul$getGossips().add(player.getUUID(), GossipType.MINOR_POSITIVE, config.rewardReputation);
         }
         player.sendSystemMessage(Component.literal("Village welfare improved nearby trades.")
-            .withStyle(ChatFormatting.GREEN)
-            .withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(Component.literal(
-                "Nearby villagers received positive gossip for you."
-            ).withStyle(ChatFormatting.GRAY)))), true);
+                .withStyle(ChatFormatting.GREEN)
+                .withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(Component.literal(
+                        "Nearby villagers received positive gossip for you."
+                ).withStyle(ChatFormatting.GRAY)))), true);
     }
 
     private static void penalizeWelfare(ServerLevel level, ServerPlayer player, VillagerOverhaulConfig.Welfare config) {
@@ -136,10 +136,10 @@ public final class VillageRuntimeService {
             ((VillagerGossipAccess) villager).villager_overhaul$getGossips().add(player.getUUID(), GossipType.MINOR_NEGATIVE, config.penaltyReputation);
         }
         player.sendSystemMessage(Component.literal("Village welfare declined nearby trades.")
-            .withStyle(ChatFormatting.RED)
-            .withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(Component.literal(
-                "Nearby villagers received minor negative gossip because welfare checks failed."
-            ).withStyle(ChatFormatting.GRAY)))), true);
+                .withStyle(ChatFormatting.RED)
+                .withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(Component.literal(
+                        "Nearby villagers received minor negative gossip because welfare checks failed."
+                ).withStyle(ChatFormatting.GRAY)))), true);
     }
 
     private static AABB around(BlockPos center, int radius) {

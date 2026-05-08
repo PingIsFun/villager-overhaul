@@ -23,10 +23,10 @@ import java.util.List;
 
 public final class VillagerOverhaulConfig {
     private static final Gson GSON = new GsonBuilder()
-        .registerTypeAdapter(SlotSelection.class, new SlotSelectionAdapter())
-        .setPrettyPrinting()
-        .disableHtmlEscaping()
-        .create();
+            .registerTypeAdapter(SlotSelection.class, new SlotSelectionAdapter())
+            .setPrettyPrinting()
+            .disableHtmlEscaping()
+            .create();
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("villager-overhaul.json");
 
     public int schemaVersion = 1;
@@ -56,6 +56,32 @@ public final class VillagerOverhaulConfig {
             VillagerOverhaul.LOGGER.info("Created default config at {}", CONFIG_PATH);
         }
         return config;
+    }
+
+    private static List<String> normalizeList(List<String> values, List<String> fallback) {
+        if (values == null) {
+            return new ArrayList<>(fallback);
+        }
+
+        List<String> normalized = new ArrayList<>();
+        for (String value : values) {
+            if (value != null && !value.trim().isEmpty()) {
+                normalized.add(value.trim());
+            }
+        }
+        return normalized;
+    }
+
+    private static List<Double> normalizeChanceList(List<Double> values, List<Double> fallback, int size) {
+        List<Double> normalized = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            double value = fallback.get(i);
+            if (values != null && i < values.size() && values.get(i) != null) {
+                value = values.get(i);
+            }
+            normalized.add(Math.clamp(value, 0.0D, 100.0D));
+        }
+        return normalized;
     }
 
     public void save() {
@@ -92,9 +118,9 @@ public final class VillagerOverhaulConfig {
         rerollPrevention.memoryRadius = Math.max(0, rerollPrevention.memoryRadius);
         rerollPrevention.affectedProfessions = normalizeList(rerollPrevention.affectedProfessions, new RerollPrevention().affectedProfessions);
         librarians.rareBookBiasChancePercentByLevel = normalizeChanceList(
-            librarians.rareBookBiasChancePercentByLevel,
-            new Librarians().rareBookBiasChancePercentByLevel,
-            5
+                librarians.rareBookBiasChancePercentByLevel,
+                new Librarians().rareBookBiasChancePercentByLevel,
+                5
         );
         librarians.duplicateSearchRadius = Math.max(1, librarians.duplicateSearchRadius);
         librarians.rareEnchantments = normalizeList(librarians.rareEnchantments, new Librarians().rareEnchantments);
@@ -106,32 +132,6 @@ public final class VillagerOverhaulConfig {
         welfare.rewardCooldownTicks = Math.max(20, welfare.rewardCooldownTicks);
         welfare.penaltyReputation = Math.max(0, welfare.penaltyReputation);
         welfare.penaltyCooldownTicks = Math.max(20, welfare.penaltyCooldownTicks);
-    }
-
-    private static List<String> normalizeList(List<String> values, List<String> fallback) {
-        if (values == null) {
-            return new ArrayList<>(fallback);
-        }
-
-        List<String> normalized = new ArrayList<>();
-        for (String value : values) {
-            if (value != null && !value.trim().isEmpty()) {
-                normalized.add(value.trim());
-            }
-        }
-        return normalized;
-    }
-
-    private static List<Double> normalizeChanceList(List<Double> values, List<Double> fallback, int size) {
-        List<Double> normalized = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            double value = fallback.get(i);
-            if (values != null && i < values.size() && values.get(i) != null) {
-                value = values.get(i);
-            }
-            normalized.add(Math.clamp(value, 0.0D, 100.0D));
-        }
-        return normalized;
     }
 
     public enum SlotSelection {
@@ -176,19 +176,19 @@ public final class VillagerOverhaulConfig {
         public boolean enabled = true;
         public int memoryRadius = 16;
         public List<String> affectedProfessions = new ArrayList<>(List.of(
-            "minecraft:armorer",
-            "minecraft:butcher",
-            "minecraft:cartographer",
-            "minecraft:cleric",
-            "minecraft:farmer",
-            "minecraft:fisherman",
-            "minecraft:fletcher",
-            "minecraft:leatherworker",
-            "minecraft:librarian",
-            "minecraft:mason",
-            "minecraft:shepherd",
-            "minecraft:toolsmith",
-            "minecraft:weaponsmith"
+                "minecraft:armorer",
+                "minecraft:butcher",
+                "minecraft:cartographer",
+                "minecraft:cleric",
+                "minecraft:farmer",
+                "minecraft:fisherman",
+                "minecraft:fletcher",
+                "minecraft:leatherworker",
+                "minecraft:librarian",
+                "minecraft:mason",
+                "minecraft:shepherd",
+                "minecraft:toolsmith",
+                "minecraft:weaponsmith"
         ));
     }
 
@@ -199,11 +199,11 @@ public final class VillagerOverhaulConfig {
         public boolean rareDuplicatePreventionEnabled = true;
         public int duplicateSearchRadius = 48;
         public List<String> rareEnchantments = new ArrayList<>(List.of(
-            "minecraft:mending",
-            "minecraft:unbreaking",
-            "minecraft:efficiency",
-            "minecraft:fortune",
-            "minecraft:silk_touch"
+                "minecraft:mending",
+                "minecraft:unbreaking",
+                "minecraft:efficiency",
+                "minecraft:fortune",
+                "minecraft:silk_touch"
         ));
     }
 
