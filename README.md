@@ -1,7 +1,6 @@
 # Villager Rebalance
 
-Villager Rebalance is a server-side Fabric mod that makes villager progression harder to exploit while keeping the mechanics configurable. It targets Minecraft 26.1 and does not require a client-side install.
-
+Villager Rebalance is a server-side Fabric mod that makes villager progression harder to exploit while keeping the mechanics configurable.
 ## Features
 
 ### Cure Discount Limits
@@ -108,5 +107,4 @@ The file is loaded on server start and saved after command changes. Use `/villag
 
 ## Requirements
 
-- Minecraft 26.1
 - Fabric API
