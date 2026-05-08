@@ -20,7 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public final class VillagerOverhaulConfig {
     private static final Gson GSON = new GsonBuilder()
@@ -70,49 +69,6 @@ public final class VillagerOverhaulConfig {
         }
     }
 
-    public String set(String key, String value) {
-        String normalized = key.toLowerCase(Locale.ROOT);
-        switch (normalized) {
-            case "curing.enabled" -> curing.enabled = parseBoolean(value, curing.enabled);
-            case "curing.maxsafecures" -> curing.maxSafeCures = parseInt(value, curing.maxSafeCures);
-            case "curing.penaltychancepercent" -> curing.penaltyChancePercent = parseDouble(value, curing.penaltyChancePercent);
-            case "curing.slotselection" -> curing.slotSelection = SlotSelection.fromConfig(value);
-            case "rerollprevention.enabled" -> rerollPrevention.enabled = parseBoolean(value, rerollPrevention.enabled);
-            case "rerollprevention.memoryradius" -> rerollPrevention.memoryRadius = parseInt(value, rerollPrevention.memoryRadius);
-            case "rerollprevention.affectedprofessions" -> rerollPrevention.affectedProfessions = parseList(value);
-            case "librarians.enabled" -> librarians.enabled = parseBoolean(value, librarians.enabled);
-            case "librarians.rarebookbiasenabled" -> librarians.rareBookBiasEnabled = parseBoolean(value, librarians.rareBookBiasEnabled);
-            case "librarians.rarebookbiaschancepercentbylevel" -> librarians.rareBookBiasChancePercentByLevel = parseDoubleList(value);
-            case "librarians.rareduplicatepreventionenabled" -> librarians.rareDuplicatePreventionEnabled = parseBoolean(value, librarians.rareDuplicatePreventionEnabled);
-            case "librarians.duplicatesearchradius" -> librarians.duplicateSearchRadius = parseInt(value, librarians.duplicateSearchRadius);
-            case "librarians.rareenchantments" -> librarians.rareEnchantments = parseList(value);
-            case "welfare.enabled" -> welfare.enabled = parseBoolean(value, welfare.enabled);
-            case "welfare.scanradius" -> welfare.scanRadius = parseInt(value, welfare.scanRadius);
-            case "welfare.minbeds" -> welfare.minBeds = parseInt(value, welfare.minBeds);
-            case "welfare.minjobsites" -> welfare.minJobSites = parseInt(value, welfare.minJobSites);
-            case "welfare.minsafelight" -> welfare.minSafeLight = parseInt(value, welfare.minSafeLight);
-            case "welfare.rewardenabled" -> welfare.rewardEnabled = parseBoolean(value, welfare.rewardEnabled);
-            case "welfare.rewardreputation" -> welfare.rewardReputation = parseInt(value, welfare.rewardReputation);
-            case "welfare.rewardcooldownticks" -> welfare.rewardCooldownTicks = parseInt(value, welfare.rewardCooldownTicks);
-            case "welfare.penaltyenabled" -> welfare.penaltyEnabled = parseBoolean(value, welfare.penaltyEnabled);
-            case "welfare.penaltyreputation" -> welfare.penaltyReputation = parseInt(value, welfare.penaltyReputation);
-            case "welfare.penaltycooldownticks" -> welfare.penaltyCooldownTicks = parseInt(value, welfare.penaltyCooldownTicks);
-            default -> throw new IllegalArgumentException("Unknown option: " + key);
-        }
-
-        validate();
-        save();
-        return normalized + " = " + switch (normalized) {
-            case "curing.slotselection" -> curing.slotSelection.configName;
-            case "curing.penaltychancepercent" -> Double.toString(curing.penaltyChancePercent);
-            case "curing.enabled" -> Boolean.toString(curing.enabled);
-            case "rerollprevention.affectedprofessions" -> String.join(",", rerollPrevention.affectedProfessions);
-            case "librarians.rarebookbiaschancepercentbylevel" -> joinDoubles(librarians.rareBookBiasChancePercentByLevel);
-            case "librarians.rareenchantments" -> String.join(",", librarians.rareEnchantments);
-            default -> value;
-        };
-    }
-
     public void validate() {
         if (curing == null) {
             curing = new Curing();
@@ -152,58 +108,6 @@ public final class VillagerOverhaulConfig {
         welfare.penaltyCooldownTicks = Math.max(20, welfare.penaltyCooldownTicks);
     }
 
-    private static int parseInt(String raw, int fallback) {
-        try {
-            return Integer.parseInt(raw);
-        } catch (NumberFormatException ignored) {
-            return fallback;
-        }
-    }
-
-    private static boolean parseBoolean(String raw, boolean fallback) {
-        if ("true".equalsIgnoreCase(raw)) {
-            return true;
-        }
-        if ("false".equalsIgnoreCase(raw)) {
-            return false;
-        }
-        return fallback;
-    }
-
-    private static double parseDouble(String raw, double fallback) {
-        try {
-            return Double.parseDouble(raw);
-        } catch (NumberFormatException ignored) {
-            return fallback;
-        }
-    }
-
-    private static List<String> parseList(String raw) {
-        List<String> values = new ArrayList<>();
-        for (String part : raw.split(",")) {
-            String trimmed = part.trim();
-            if (!trimmed.isEmpty()) {
-                values.add(trimmed);
-            }
-        }
-        return values;
-    }
-
-    private static List<Double> parseDoubleList(String raw) {
-        List<Double> values = new ArrayList<>();
-        for (String part : raw.split(",")) {
-            String trimmed = part.trim();
-            if (!trimmed.isEmpty()) {
-                try {
-                    values.add(Double.parseDouble(trimmed));
-                } catch (NumberFormatException ignored) {
-                    values.add(0.0D);
-                }
-            }
-        }
-        return values;
-    }
-
     private static List<String> normalizeList(List<String> values, List<String> fallback) {
         if (values == null) {
             return new ArrayList<>(fallback);
@@ -228,14 +132,6 @@ public final class VillagerOverhaulConfig {
             normalized.add(Math.clamp(value, 0.0D, 100.0D));
         }
         return normalized;
-    }
-
-    private static String joinDoubles(List<Double> values) {
-        List<String> parts = new ArrayList<>();
-        for (double value : values) {
-            parts.add(Double.toString(value));
-        }
-        return String.join(",", parts);
     }
 
     public enum SlotSelection {

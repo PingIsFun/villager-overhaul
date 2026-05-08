@@ -91,14 +91,64 @@ Config options:
 
 All commands require admin permission level.
 
-```
+```mcfunction
+/villageroverhaul
+/villageroverhaul help
 /villageroverhaul reload
-/villageroverhaul status
-/villageroverhaul status <curing|rerollPrevention|librarians|welfare>
-/villageroverhaul set <option> <value>
 ```
 
-The status output uses color, hover text, and clickable module rows. Clicking a module in `/villageroverhaul status` opens that module's detailed status page.
+Running a module or setting command without a value prints its current status. Adding the final value changes that setting.
+
+```mcfunction
+/villageroverhaul curing
+/villageroverhaul curing enabled
+/villageroverhaul curing enabled <true|false>
+/villageroverhaul curing max-safe-cures <value>
+/villageroverhaul curing penalty-chance <percent>
+/villageroverhaul curing slot-selection <random|highest-value|last-slot>
+```
+
+```mcfunction
+/villageroverhaul reroll
+/villageroverhaul reroll affected-professions
+/villageroverhaul reroll enabled <true|false>
+/villageroverhaul reroll memory-radius <blocks>
+/villageroverhaul reroll affected-professions add <profession>
+/villageroverhaul reroll affected-professions remove <profession>
+/villageroverhaul reroll affected-professions clear
+```
+
+```mcfunction
+/villageroverhaul librarians
+/villageroverhaul librarians rare-book-bias chance <level>
+/villageroverhaul librarians enabled <true|false>
+/villageroverhaul librarians rare-book-bias enabled <true|false>
+/villageroverhaul librarians rare-book-bias chance <level> <percent>
+/villageroverhaul librarians rare-duplicates enabled <true|false>
+/villageroverhaul librarians rare-duplicates search-radius <blocks>
+/villageroverhaul librarians rare-enchantments add <enchantment>
+/villageroverhaul librarians rare-enchantments remove <enchantment>
+/villageroverhaul librarians rare-enchantments clear
+```
+
+```mcfunction
+/villageroverhaul welfare
+/villageroverhaul welfare reward
+/villageroverhaul welfare penalty
+/villageroverhaul welfare enabled <true|false>
+/villageroverhaul welfare scan-radius <blocks>
+/villageroverhaul welfare min-beds <count>
+/villageroverhaul welfare min-job-sites <count>
+/villageroverhaul welfare min-safe-light <level>
+/villageroverhaul welfare reward enabled <true|false>
+/villageroverhaul welfare reward reputation <amount>
+/villageroverhaul welfare reward cooldown <ticks>
+/villageroverhaul welfare penalty enabled <true|false>
+/villageroverhaul welfare penalty reputation <amount>
+/villageroverhaul welfare penalty cooldown <ticks>
+```
+
+Command output uses color, hover text, and clickable help lines.
 
 ## Configuration
 
@@ -108,7 +158,7 @@ The config file is generated at:
 config/villager-overhaul.json
 ```
 
-The file is loaded on server start and saved after `/villageroverhaul set` changes. Use `/villageroverhaul reload` to reload the file at runtime.
+The file is loaded on server start and saved after command changes. Use `/villageroverhaul reload` to reload the file at runtime.
 
 ## Requirements
 
