@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class VillagerOverhaul implements DedicatedServerModInitializer {
-    public static final String MOD_ID = "villager-overhaul";
+    public static final String MOD_ID = "villager-rebalance";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static VillagerOverhaulConfig config;

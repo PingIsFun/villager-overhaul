@@ -1,6 +1,6 @@
-# Villager Overhaul
+# Villager Rebalance
 
-Villager Overhaul is a server-side Fabric mod that makes villager progression harder to exploit while keeping the mechanics configurable. It targets Minecraft 26.1 and does not require a client-side install.
+Villager Rebalance is a server-side Fabric mod that makes villager progression harder to exploit while keeping the mechanics configurable. It targets Minecraft 26.1 and does not require a client-side install.
 
 ## Features
 
@@ -92,8 +92,8 @@ Config options:
 All commands require admin permission level.
 
 ```
-/villageroverhaul help
-/villageroverhaul reload
+/villagerrebalance help
+/villagerrebalance reload
 ```
 
 ## Configuration
@@ -101,10 +101,10 @@ All commands require admin permission level.
 The config file is generated at:
 
 ```text
-config/villager-overhaul.json
+config/villager-rebalance.json
 ```
 
-The file is loaded on server start and saved after command changes. Use `/villageroverhaul reload` to reload the file at runtime.
+The file is loaded on server start and saved after command changes. Use `/villagerrebalance reload` to reload the file at runtime.
 
 ## Requirements
 

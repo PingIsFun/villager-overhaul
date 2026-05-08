@@ -13,8 +13,8 @@
     }
   ],
   "contact": {
-    "sources": "https://github.com/PingIsFun/villager-overhaul",
-    "issues": "https://github.com/PingIsFun/villager-overhaul/issues"
+    "sources": "https://github.com/PingIsFun/villager-rebalance",
+    "issues": "https://github.com/PingIsFun/villager-rebalance/issues"
   },
   "license": "MIT",
   "environment": "server",

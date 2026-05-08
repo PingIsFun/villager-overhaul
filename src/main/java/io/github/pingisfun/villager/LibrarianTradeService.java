@@ -7,6 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
@@ -69,7 +70,7 @@ public final class LibrarianTradeService {
         Registry<Enchantment> registry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         return enchantments.entrySet().stream()
                 .findFirst()
-                .flatMap(entry -> entry.getKey().unwrapKey().map(key -> key.identifier()))
+                .flatMap(entry -> entry.getKey().unwrapKey().map(ResourceKey::identifier))
                 .or(() -> enchantments.entrySet().stream().findFirst().map(entry -> registry.getKey(entry.getKey().value())));
     }
 

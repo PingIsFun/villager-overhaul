@@ -27,7 +27,7 @@ public final class VillagerOverhaulConfig {
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .create();
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("villager-overhaul.json");
+    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("villager-rebalance.json");
 
     public int schemaVersion = 1;
     public Curing curing = new Curing();

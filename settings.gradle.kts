@@ -22,4 +22,4 @@ stonecutter {
     }
 }
 
-rootProject.name = "villager-overhaul"
+rootProject.name = "villager-rebalance"

@@ -36,7 +36,7 @@ public final class VillagerOverhaulCommands {
 
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
-                Commands.literal("villageroverhaul")
+                Commands.literal("villagerrebalance")
                         .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
                         .executes(context -> help(context.getSource()))
                         .then(Commands.literal("help")
@@ -53,11 +53,11 @@ public final class VillagerOverhaulCommands {
     private static int help(CommandSourceStack source) {
         source.sendSuccess(() -> prefix("Help")
                 .append(Component.literal(" Click a line to run or inspect a command.").withStyle(ChatFormatting.GRAY)), false);
-        source.sendSuccess(() -> helpLine("/villageroverhaul reload", "Reload villager-overhaul.json."), false);
-        source.sendSuccess(() -> helpLine("/villageroverhaul curing", "Show or configure cure penalty behavior."), false);
-        source.sendSuccess(() -> helpLine("/villageroverhaul reroll", "Show or configure workstation reroll prevention."), false);
-        source.sendSuccess(() -> helpLine("/villageroverhaul librarians", "Show or configure librarian book behavior."), false);
-        source.sendSuccess(() -> helpLine("/villageroverhaul welfare", "Show or configure village welfare checks."), false);
+        source.sendSuccess(() -> helpLine("/villagerrebalance reload", "Reload villager-rebalance.json."), false);
+        source.sendSuccess(() -> helpLine("/villagerrebalance curing", "Show or configure cure penalty behavior."), false);
+        source.sendSuccess(() -> helpLine("/villagerrebalance reroll", "Show or configure workstation reroll prevention."), false);
+        source.sendSuccess(() -> helpLine("/villagerrebalance librarians", "Show or configure librarian book behavior."), false);
+        source.sendSuccess(() -> helpLine("/villagerrebalance welfare", "Show or configure village welfare checks."), false);
         return 1;
     }
 
@@ -270,7 +270,7 @@ public final class VillagerOverhaulCommands {
         source.sendSuccess(() -> Component.empty()
                 .append(prefix("Reloaded"))
                 .append(Component.literal(" Config saved and runtime values refreshed.").withStyle(ChatFormatting.GRAY))
-                .withStyle(style -> style.withHoverEvent(hover("Configuration was reloaded from villager-overhaul.json.\nCuring is " + onOff(config.curing.enabled) + "."))), false);
+                .withStyle(style -> style.withHoverEvent(hover("Configuration was reloaded from villager-rebalance.json.\nCuring is " + onOff(config.curing.enabled) + "."))), false);
         return 1;
     }
 
@@ -407,7 +407,7 @@ public final class VillagerOverhaulCommands {
         source.sendSuccess(() -> prefix("Updated")
                 .append(Component.literal(" " + setting).withStyle(ChatFormatting.AQUA))
                 .append(Component.literal(" saved.").withStyle(ChatFormatting.GRAY))
-                .withStyle(style -> style.withHoverEvent(hover("Saved to villager-overhaul.json.\nUse /villageroverhaul " + commandGroupFor(setting) + " to inspect this group."))), false);
+                .withStyle(style -> style.withHoverEvent(hover("Saved to villager-rebalance.json.\nUse /villagerrebalance " + commandGroupFor(setting) + " to inspect this group."))), false);
         return 1;
     }
 
@@ -485,7 +485,7 @@ public final class VillagerOverhaulCommands {
     }
 
     private static MutableComponent prefix(String label) {
-        return Component.literal("[Villager Overhaul] ").withStyle(ChatFormatting.GOLD)
+        return Component.literal("[Villager Rebalance] ").withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(label).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD));
     }
 
