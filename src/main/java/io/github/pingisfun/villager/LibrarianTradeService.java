@@ -39,11 +39,21 @@ public final class LibrarianTradeService {
             return;
         }
 
+        Set<Identifier> rareIds = parseRareIds(config);
+        if (rareIds.isEmpty()) {
+            return;
+        }
+
+        List<Holder<Enchantment>> rareEnchantments = tradeableRareEnchantments(level, rareIds);
+        if (rareEnchantments.isEmpty()) {
+            return;
+        }
+
         MerchantOffers offers = villager.getOffers();
         for (int i = Math.max(0, previousOfferCount); i < offers.size(); i++) {
             MerchantOffer offer = offers.get(i);
             if (offer.getResult().is(Items.ENCHANTED_BOOK)) {
-                Optional<Holder<Enchantment>> enchantment = pickEnchantment(level, villager, offer, config);
+                Optional<Holder<Enchantment>> enchantment = pickEnchantment(level, villager, offer, config, rareIds, rareEnchantments);
                 if (enchantment.isPresent()) {
                     offers.set(i, replaceBook(offer, enchantment.get()));
                 }
@@ -68,45 +78,42 @@ public final class LibrarianTradeService {
         ServerLevel level,
         Villager villager,
         MerchantOffer offer,
-        VillagerOverhaulConfig config
+        VillagerOverhaulConfig config,
+        Set<Identifier> rareIds,
+        List<Holder<Enchantment>> rareEnchantments
     ) {
-        Registry<Enchantment> registry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-        Set<Identifier> rareIds = parseRareIds(config);
-        List<Holder<Enchantment>> rare = new ArrayList<>();
-
-        for (Holder<Enchantment> enchantment : registry.getTagOrEmpty(EnchantmentTags.TRADEABLE)) {
-            Optional<Identifier> id = enchantment.unwrapKey().map(key -> key.identifier());
-            if (id.isPresent() && rareIds.contains(id.get())) {
-                rare.add(enchantment);
-            }
-        }
-
-        if (!preferRare(villager.getVillagerData().level(), level.getRandom()) || rare.isEmpty()) {
+        if (!config.librarians.rareBookBiasEnabled && !config.librarians.rareDuplicatePreventionEnabled) {
             return Optional.empty();
         }
 
-        List<Holder<Enchantment>> preferred = rare;
+        List<Holder<Enchantment>> preferred = rareEnchantments;
         if (config.librarians.rareDuplicatePreventionEnabled) {
-            List<Holder<Enchantment>> filtered = withoutNearbyRareDuplicates(level, villager, rare, rareIds, config.librarians.duplicateSearchRadius);
+            Optional<Identifier> currentRare = bookEnchantmentId(level, offer.getResult()).filter(rareIds::contains);
+            List<Holder<Enchantment>> filtered = withoutNearbyRareDuplicates(level, villager, rareEnchantments, rareIds, config.librarians.duplicateSearchRadius);
             if (!filtered.isEmpty()) {
                 preferred = filtered;
             }
+
+            if (!config.librarians.rareBookBiasEnabled) {
+                List<Holder<Enchantment>> duplicateSafePreferred = preferred;
+                return currentRare.filter(id -> hasNearbyRareDuplicate(level, villager, id, config.librarians.duplicateSearchRadius))
+                    .flatMap(id -> pickReplacement(level, duplicateSafePreferred, id));
+            }
         }
 
-        if (preferred.isEmpty()) {
+        if (!config.librarians.rareBookBiasEnabled || !preferRare(villager.getVillagerData().level(), config, level.getRandom())) {
             return Optional.empty();
         }
 
-        return Optional.of(preferred.get(level.getRandom().nextInt(preferred.size())));
+        return pickReplacement(level, preferred, null);
     }
 
-    private static boolean preferRare(int level, RandomSource random) {
-        return switch (level) {
-            case 3 -> random.nextFloat() < 0.25F;
-            case 4 -> random.nextFloat() < 0.50F;
-            case 5 -> random.nextFloat() < 0.75F;
-            default -> false;
-        };
+    private static boolean preferRare(int level, VillagerOverhaulConfig config, RandomSource random) {
+        int index = level - 1;
+        if (index < 0 || index >= config.librarians.rareBookBiasChancePercentByLevel.size()) {
+            return false;
+        }
+        return random.nextDouble() * 100.0D < config.librarians.rareBookBiasChancePercentByLevel.get(index);
     }
 
     private static List<Holder<Enchantment>> withoutNearbyRareDuplicates(
@@ -136,6 +143,41 @@ public final class LibrarianTradeService {
         return filtered;
     }
 
+    private static boolean hasNearbyRareDuplicate(ServerLevel level, Villager villager, Identifier enchantmentId, int radius) {
+        AABB bounds = villager.getBoundingBox().inflate(radius);
+        for (Villager other : level.getEntities(EntityType.VILLAGER, bounds, other -> other != villager)) {
+            for (MerchantOffer offer : other.getOffers()) {
+                if (offer.getResult().is(Items.ENCHANTED_BOOK)
+                    && bookEnchantmentId(level, offer.getResult()).filter(enchantmentId::equals).isPresent()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static Optional<Holder<Enchantment>> pickReplacement(
+        ServerLevel level,
+        List<Holder<Enchantment>> candidates,
+        Identifier excluded
+    ) {
+        List<Holder<Enchantment>> filtered = candidates;
+        if (excluded != null) {
+            filtered = new ArrayList<>();
+            for (Holder<Enchantment> candidate : candidates) {
+                Optional<Identifier> id = candidate.unwrapKey().map(key -> key.identifier());
+                if (id.isPresent() && !excluded.equals(id.get())) {
+                    filtered.add(candidate);
+                }
+            }
+        }
+
+        if (filtered.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(filtered.get(level.getRandom().nextInt(filtered.size())));
+    }
+
     private static MerchantOffer replaceBook(MerchantOffer original, Holder<Enchantment> enchantment) {
         ItemStack result = new ItemStack(Items.ENCHANTED_BOOK);
         EnchantmentHelper.updateEnchantments(result, enchantments -> enchantments.set(enchantment, enchantment.value().getMaxLevel()));
@@ -160,5 +202,17 @@ public final class LibrarianTradeService {
             }
         }
         return ids;
+    }
+
+    private static List<Holder<Enchantment>> tradeableRareEnchantments(ServerLevel level, Set<Identifier> rareIds) {
+        Registry<Enchantment> registry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        List<Holder<Enchantment>> rare = new ArrayList<>();
+        for (Holder<Enchantment> enchantment : registry.getTagOrEmpty(EnchantmentTags.TRADEABLE)) {
+            Optional<Identifier> id = enchantment.unwrapKey().map(key -> key.identifier());
+            if (id.isPresent() && rareIds.contains(id.get())) {
+                rare.add(enchantment);
+            }
+        }
+        return rare;
     }
 }

@@ -181,7 +181,7 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Cu
         return config.rerollPrevention.enabled
             && villagerXp <= 0
             && !this.getVillagerData().profession().is(VillagerProfession.NONE)
-            && config.rerollPrevention.protectedProfessions.contains(villager_overhaul$professionId())
+            && config.rerollPrevention.affectedProfessions.contains(villager_overhaul$professionId())
             && (this.offers == null || this.offers.stream().noneMatch(offer -> offer.getUses() > 0));
     }
 

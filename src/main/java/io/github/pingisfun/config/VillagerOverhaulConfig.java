@@ -75,8 +75,10 @@ public final class VillagerOverhaulConfig {
             case "curing.slotselection" -> curing.slotSelection = SlotSelection.fromConfig(value);
             case "rerollprevention.enabled" -> rerollPrevention.enabled = parseBoolean(value, rerollPrevention.enabled);
             case "rerollprevention.memoryradius" -> rerollPrevention.memoryRadius = parseInt(value, rerollPrevention.memoryRadius);
-            case "rerollprevention.protectedprofessions" -> rerollPrevention.protectedProfessions = parseList(value);
+            case "rerollprevention.affectedprofessions" -> rerollPrevention.affectedProfessions = parseList(value);
             case "librarians.enabled" -> librarians.enabled = parseBoolean(value, librarians.enabled);
+            case "librarians.rarebookbiasenabled" -> librarians.rareBookBiasEnabled = parseBoolean(value, librarians.rareBookBiasEnabled);
+            case "librarians.rarebookbiaschancepercentbylevel" -> librarians.rareBookBiasChancePercentByLevel = parseDoubleList(value);
             case "librarians.rareduplicatepreventionenabled" -> librarians.rareDuplicatePreventionEnabled = parseBoolean(value, librarians.rareDuplicatePreventionEnabled);
             case "librarians.duplicatesearchradius" -> librarians.duplicateSearchRadius = parseInt(value, librarians.duplicateSearchRadius);
             case "librarians.rareenchantments" -> librarians.rareEnchantments = parseList(value);
@@ -100,7 +102,8 @@ public final class VillagerOverhaulConfig {
             case "curing.slotselection" -> curing.slotSelection.configName;
             case "curing.penaltychancepercent" -> Double.toString(curing.penaltyChancePercent);
             case "curing.enabled" -> Boolean.toString(curing.enabled);
-            case "rerollprevention.protectedprofessions" -> String.join(",", rerollPrevention.protectedProfessions);
+            case "rerollprevention.affectedprofessions" -> String.join(",", rerollPrevention.affectedProfessions);
+            case "librarians.rarebookbiaschancepercentbylevel" -> joinDoubles(librarians.rareBookBiasChancePercentByLevel);
             case "librarians.rareenchantments" -> String.join(",", librarians.rareEnchantments);
             default -> value;
         };
@@ -127,7 +130,12 @@ public final class VillagerOverhaulConfig {
         }
 
         rerollPrevention.memoryRadius = Math.max(0, rerollPrevention.memoryRadius);
-        rerollPrevention.protectedProfessions = normalizeList(rerollPrevention.protectedProfessions, new RerollPrevention().protectedProfessions);
+        rerollPrevention.affectedProfessions = normalizeList(rerollPrevention.affectedProfessions, new RerollPrevention().affectedProfessions);
+        librarians.rareBookBiasChancePercentByLevel = normalizeChanceList(
+            librarians.rareBookBiasChancePercentByLevel,
+            new Librarians().rareBookBiasChancePercentByLevel,
+            5
+        );
         librarians.duplicateSearchRadius = Math.max(1, librarians.duplicateSearchRadius);
         librarians.rareEnchantments = normalizeList(librarians.rareEnchantments, new Librarians().rareEnchantments);
         welfare.scanRadius = Math.max(1, welfare.scanRadius);
@@ -177,6 +185,21 @@ public final class VillagerOverhaulConfig {
         return values;
     }
 
+    private static List<Double> parseDoubleList(String raw) {
+        List<Double> values = new ArrayList<>();
+        for (String part : raw.split(",")) {
+            String trimmed = part.trim();
+            if (!trimmed.isEmpty()) {
+                try {
+                    values.add(Double.parseDouble(trimmed));
+                } catch (NumberFormatException ignored) {
+                    values.add(0.0D);
+                }
+            }
+        }
+        return values;
+    }
+
     private static List<String> normalizeList(List<String> values, List<String> fallback) {
         if (values == null) {
             return new ArrayList<>(fallback);
@@ -189,6 +212,26 @@ public final class VillagerOverhaulConfig {
             }
         }
         return normalized;
+    }
+
+    private static List<Double> normalizeChanceList(List<Double> values, List<Double> fallback, int size) {
+        List<Double> normalized = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            double value = fallback.get(i);
+            if (values != null && i < values.size() && values.get(i) != null) {
+                value = values.get(i);
+            }
+            normalized.add(Math.clamp(value, 0.0D, 100.0D));
+        }
+        return normalized;
+    }
+
+    private static String joinDoubles(List<Double> values) {
+        List<String> parts = new ArrayList<>();
+        for (double value : values) {
+            parts.add(Double.toString(value));
+        }
+        return String.join(",", parts);
     }
 
     public enum SlotSelection {
@@ -232,7 +275,7 @@ public final class VillagerOverhaulConfig {
     public static final class RerollPrevention {
         public boolean enabled = true;
         public int memoryRadius = 16;
-        public List<String> protectedProfessions = new ArrayList<>(List.of(
+        public List<String> affectedProfessions = new ArrayList<>(List.of(
             "minecraft:armorer",
             "minecraft:butcher",
             "minecraft:cartographer",
@@ -251,6 +294,8 @@ public final class VillagerOverhaulConfig {
 
     public static final class Librarians {
         public boolean enabled = true;
+        public boolean rareBookBiasEnabled = false;
+        public List<Double> rareBookBiasChancePercentByLevel = new ArrayList<>(List.of(0.0D, 0.0D, 25.0D, 50.0D, 75.0D));
         public boolean rareDuplicatePreventionEnabled = true;
         public int duplicateSearchRadius = 48;
         public List<String> rareEnchantments = new ArrayList<>(List.of(

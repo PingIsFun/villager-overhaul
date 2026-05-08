@@ -31,8 +31,10 @@ public final class VillagerOverhaulCommands {
         "curing.slotSelection",
         "rerollPrevention.enabled",
         "rerollPrevention.memoryRadius",
-        "rerollPrevention.protectedProfessions",
+        "rerollPrevention.affectedProfessions",
         "librarians.enabled",
+        "librarians.rareBookBiasEnabled",
+        "librarians.rareBookBiasChancePercentByLevel",
         "librarians.rareDuplicatePreventionEnabled",
         "librarians.duplicateSearchRadius",
         "librarians.rareEnchantments",
@@ -87,16 +89,17 @@ public final class VillagerOverhaulCommands {
     private static CompletableFuture<Suggestions> suggestValues(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
         String option = StringArgumentType.getString(context, "option").toLowerCase(Locale.ROOT);
         return switch (option) {
-            case "curing.enabled", "rerollprevention.enabled", "librarians.enabled",
+            case "curing.enabled", "rerollprevention.enabled", "librarians.enabled", "librarians.rarebookbiasenabled",
                 "librarians.rareduplicatepreventionenabled", "welfare.enabled", "welfare.rewardenabled", "welfare.penaltyenabled" -> suggestMatching(builder, BOOLEANS);
             case "curing.slotselection" -> suggestMatching(builder, SLOT_SELECTIONS);
             case "curing.maxsafecures" -> suggestMatching(builder, "0", "1", "2", "3");
             case "curing.penaltychancepercent" -> suggestMatching(builder, "0", "25", "50", "75", "100");
+            case "librarians.rarebookbiaschancepercentbylevel" -> suggestMatching(builder, "0,0,25,50,75", "5,10,25,50,75", "0,0,0,0,0", "100,100,100,100,100");
             case "rerollprevention.memoryradius", "librarians.duplicatesearchradius", "welfare.scanradius" -> suggestMatching(builder, "16", "32", "48", "64");
             case "welfare.minbeds", "welfare.minjobsites", "welfare.minsafelight", "welfare.rewardreputation",
                 "welfare.penaltyreputation" -> suggestMatching(builder, "0", "1", "2", "3", "4", "8");
             case "welfare.rewardcooldownticks", "welfare.penaltycooldownticks" -> suggestMatching(builder, "1200", "6000", "24000");
-            case "rerollprevention.protectedprofessions" -> suggestMatching(builder, "minecraft:librarian", "minecraft:librarian,minecraft:toolsmith");
+            case "rerollprevention.affectedprofessions" -> suggestMatching(builder, "minecraft:librarian", "minecraft:librarian,minecraft:toolsmith");
             case "librarians.rareenchantments" -> suggestMatching(builder, "minecraft:mending,minecraft:fortune");
             default -> builder.buildFuture();
         };
@@ -126,8 +129,8 @@ public final class VillagerOverhaulCommands {
         VillagerOverhaulConfig config = VillagerOverhaul.config();
         source.sendSuccess(() -> prefix("Status").append(Component.literal(" Hover a module for details.").withStyle(ChatFormatting.GRAY)), false);
         source.sendSuccess(() -> statusLine("curing", config.curing.enabled, "Cure abuse trade penalty settings."), false);
-        source.sendSuccess(() -> statusLine("rerollPrevention", config.rerollPrevention.enabled, "Locks first generated offers for protected untraded villagers."), false);
-        source.sendSuccess(() -> statusLine("librarians", config.librarians.enabled, "Biases higher-level librarian books toward configured rare enchantments."), false);
+        source.sendSuccess(() -> statusLine("rerollPrevention", config.rerollPrevention.enabled, "Locks first generated offers for affected untraded villagers."), false);
+        source.sendSuccess(() -> statusLine("librarians", config.librarians.enabled, "Controls rare librarian book bias and duplicate prevention."), false);
         source.sendSuccess(() -> statusLine("welfare", config.welfare.enabled, "Rewards players near maintained villages."), false);
         return 1;
     }
@@ -147,11 +150,13 @@ public final class VillagerOverhaulCommands {
                 source.sendSuccess(() -> groupHeader("rerollPrevention", config.rerollPrevention.enabled, "Prevents workstation break-and-replace trade rerolling."), false);
                 source.sendSuccess(() -> valueLine("enabled", config.rerollPrevention.enabled, "Use vanilla behavior when off."), false);
                 source.sendSuccess(() -> valueLine("memoryRadius", config.rerollPrevention.memoryRadius, "Distance from the remembered job site before a profession change can clear stored offers."), false);
-                source.sendSuccess(() -> listLine("protectedProfessions", config.rerollPrevention.protectedProfessions, "Comma-separated profession ids affected by reroll prevention."), false);
+                source.sendSuccess(() -> listLine("affectedProfessions", config.rerollPrevention.affectedProfessions, "Comma-separated profession ids affected by reroll prevention."), false);
             }
             case "librarians" -> {
-                source.sendSuccess(() -> groupHeader("librarians", config.librarians.enabled, "Controls librarian rare book leveling and duplicate prevention."), false);
+                source.sendSuccess(() -> groupHeader("librarians", config.librarians.enabled, "Controls librarian rare book bias and duplicate prevention."), false);
                 source.sendSuccess(() -> valueLine("enabled", config.librarians.enabled, "Use vanilla librarian book generation when off."), false);
+                source.sendSuccess(() -> valueLine("rareBookBiasEnabled", config.librarians.rareBookBiasEnabled, "Bias higher-level book trades toward configured rare enchantments."), false);
+                source.sendSuccess(() -> listLine("rareBookBiasChancePercentByLevel", config.librarians.rareBookBiasChancePercentByLevel, "Five comma-separated chances for villager levels 1, 2, 3, 4, and 5."), false);
                 source.sendSuccess(() -> valueLine("rareDuplicatePreventionEnabled", config.librarians.rareDuplicatePreventionEnabled, "Avoid nearby duplicate rare enchantments when alternatives exist."), false);
                 source.sendSuccess(() -> valueLine("duplicateSearchRadius", config.librarians.duplicateSearchRadius, "Radius used to inspect nearby librarians."), false);
                 source.sendSuccess(() -> listLine("rareEnchantments", config.librarians.rareEnchantments, "Configured high-tier enchantment ids."), false);
@@ -183,7 +188,7 @@ public final class VillagerOverhaulCommands {
     }
 
     private static void warnInvalidRegistryIds(CommandSourceStack source, VillagerOverhaulConfig config) {
-        for (String raw : config.rerollPrevention.protectedProfessions) {
+        for (String raw : config.rerollPrevention.affectedProfessions) {
             Identifier id = Identifier.tryParse(raw);
             if (id == null || !BuiltInRegistries.VILLAGER_PROFESSION.containsKey(id)) {
                 VillagerOverhaul.LOGGER.warn("Ignoring unknown villager profession id in config at runtime: {}", raw);
@@ -242,8 +247,15 @@ public final class VillagerOverhaulCommands {
             .withStyle(style -> style.withHoverEvent(hover(tooltip)));
     }
 
-    private static MutableComponent listLine(String key, Iterable<String> values, String tooltip) {
-        return valueLine(key, String.join(", ", values), tooltip);
+    private static MutableComponent listLine(String key, Iterable<?> values, String tooltip) {
+        StringBuilder joined = new StringBuilder();
+        for (Object value : values) {
+            if (!joined.isEmpty()) {
+                joined.append(", ");
+            }
+            joined.append(value);
+        }
+        return valueLine(key, joined.toString(), tooltip);
     }
 
     private static MutableComponent state(boolean enabled) {
